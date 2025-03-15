@@ -1,6 +1,7 @@
 package com.nimbleways.springboilerplate.services.implementations;
 
 import java.time.LocalDate;
+import java.util.Optional;
 import java.util.Set;
 
 import com.nimbleways.springboilerplate.entities.Order;
@@ -26,7 +27,11 @@ public class ProductService {
     NotificationService ns;
 
     public Long processOrder(Long orderId) {
-        Order order = or.findById(orderId).get();
+        Optional<Order> orderOptional = or.findById(orderId);
+        if (orderOptional.isEmpty()) {
+            throw new RuntimeException(String.format("No order found with id %s", orderId));
+        }
+        Order order = orderOptional.get();
         log.info("order={}", order);
         Set<Product> products = order.getItems();
         for (Product p : products) {
@@ -43,11 +48,14 @@ public class ProductService {
                     }
                 }
                 case SEASONAL -> {
-                    // Add new season rules
-                    if ((LocalDate.now().isAfter(p.getSeasonStartDate()) && LocalDate.now().isBefore(p.getSeasonEndDate())
-                        && p.getAvailable() > 0)) {
-                        p.setAvailable(p.getAvailable() - 1);
-                        pr.save(p);
+                    if (p.getAvailable() > 0) {
+                        LocalDate now = LocalDate.now();
+                        if (now.isAfter(p.getSeasonStartDate()) && now.isBefore(p.getSeasonEndDate())) {
+                            p.setAvailable(p.getAvailable() - 1);
+                            pr.save(p);
+                        } else {
+                            ns.sendOutOfStockNotification(p.getName());
+                        }
                     } else {
                         handleSeasonalProduct(p);
                     }
