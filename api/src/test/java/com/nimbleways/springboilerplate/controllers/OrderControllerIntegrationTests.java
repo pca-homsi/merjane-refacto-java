@@ -60,6 +60,14 @@ public class OrderControllerIntegrationTests {
                 assertEquals(resultOrder.getId(), order.getId());
         }
 
+        @Test
+        public void processOrderShouldReturnErrorWhenOrderIsNotFound() throws Exception {
+                Long nonExistingOrder = 1L;
+                mockMvc.perform(post("/orders/{orderId}/processOrder", nonExistingOrder)
+                        .contentType("application/json"))
+                    .andExpect(status().isNotFound());
+        }
+
         private static Order createOrder(Set<Product> products) {
                 Order order = new Order();
                 order.setItems(products);

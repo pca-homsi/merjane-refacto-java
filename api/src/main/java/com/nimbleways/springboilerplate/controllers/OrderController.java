@@ -6,6 +6,7 @@ import com.nimbleways.springboilerplate.services.implementations.ProductService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,9 +21,13 @@ public class OrderController {
     private ProductService ps;
 
     @PostMapping("{orderId}/processOrder")
-    @ResponseStatus(HttpStatus.OK)
-    public ProcessOrderResponse processOrder(@PathVariable Long orderId) {
-        Long id = ps.processOrder(orderId);
-        return new ProcessOrderResponse(id);
+    public ResponseEntity<ProcessOrderResponse> processOrder(@PathVariable Long orderId) {
+        try {
+            Long id = ps.processOrder(orderId);
+            return ResponseEntity.ok(new ProcessOrderResponse(id)); // Return success response
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(null); // Return error response
+        }
     }
 }
