@@ -1,4 +1,4 @@
-package com.nimbleways.springboilerplate.contollers;
+package com.nimbleways.springboilerplate.controllers;
 
 import com.nimbleways.springboilerplate.dto.product.ProcessOrderResponse;
 import com.nimbleways.springboilerplate.entities.Order;
@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/orders")
-public class MyController {
+public class OrderController {
     @Autowired
     private ProductService ps;
 
