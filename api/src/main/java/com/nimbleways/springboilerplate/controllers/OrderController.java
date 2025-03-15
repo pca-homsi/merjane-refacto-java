@@ -3,6 +3,7 @@ package com.nimbleways.springboilerplate.controllers;
 import com.nimbleways.springboilerplate.dto.product.ProcessOrderResponse;
 import com.nimbleways.springboilerplate.entities.Order;
 import com.nimbleways.springboilerplate.entities.Product;
+import com.nimbleways.springboilerplate.entities.ProductType;
 import com.nimbleways.springboilerplate.repositories.OrderRepository;
 import com.nimbleways.springboilerplate.repositories.ProductRepository;
 import com.nimbleways.springboilerplate.services.implementations.ProductService;
@@ -43,7 +44,7 @@ public class OrderController {
         ids.add(orderId);
         Set<Product> products = order.getItems();
         for (Product p : products) {
-            if (p.getType().equals("NORMAL")) {
+            if (ProductType.NORMAL.equals(p.getType())) {
                 if (p.getAvailable() > 0) {
                     p.setAvailable(p.getAvailable() - 1);
                     pr.save(p);
@@ -53,7 +54,7 @@ public class OrderController {
                         ps.notifyDelay(leadTime, p);
                     }
                 }
-            } else if (p.getType().equals("SEASONAL")) {
+            } else if (ProductType.SEASONAL.equals(p.getType())) {
                 // Add new season rules
                 if ((LocalDate.now().isAfter(p.getSeasonStartDate()) && LocalDate.now().isBefore(p.getSeasonEndDate())
                         && p.getAvailable() > 0)) {
@@ -62,7 +63,7 @@ public class OrderController {
                 } else {
                     ps.handleSeasonalProduct(p);
                 }
-            } else if (p.getType().equals("EXPIRABLE")) {
+            } else if (ProductType.EXPIRABLE.equals(p.getType())) {
                 if (p.getAvailable() > 0 && p.getExpiryDate().isAfter(LocalDate.now())) {
                     p.setAvailable(p.getAvailable() - 1);
                     pr.save(p);
