@@ -40,8 +40,6 @@ public class OrderController {
     public ProcessOrderResponse processOrder(@PathVariable Long orderId) {
         Order order = or.findById(orderId).get();
         log.info("order={}", order);
-        List<Long> ids = new ArrayList<>();
-        ids.add(orderId);
         Set<Product> products = order.getItems();
         for (Product p : products) {
             if (ProductType.NORMAL.equals(p.getType())) {
