@@ -42,31 +42,35 @@ public class OrderController {
         log.info("order={}", order);
         Set<Product> products = order.getItems();
         for (Product p : products) {
-            if (ProductType.NORMAL.equals(p.getType())) {
-                if (p.getAvailable() > 0) {
-                    p.setAvailable(p.getAvailable() - 1);
-                    pr.save(p);
-                } else {
-                    int leadTime = p.getLeadTime();
-                    if (leadTime > 0) {
-                        ps.notifyDelay(leadTime, p);
+            switch (p.getType()) {
+                case NORMAL -> {
+                    if (p.getAvailable() > 0) {
+                        p.setAvailable(p.getAvailable() - 1);
+                        pr.save(p);
+                    } else {
+                        int leadTime = p.getLeadTime();
+                        if (leadTime > 0) {
+                            ps.notifyDelay(leadTime, p);
+                        }
                     }
                 }
-            } else if (ProductType.SEASONAL.equals(p.getType())) {
-                // Add new season rules
-                if ((LocalDate.now().isAfter(p.getSeasonStartDate()) && LocalDate.now().isBefore(p.getSeasonEndDate())
+                case SEASONAL -> {
+                    // Add new season rules
+                    if ((LocalDate.now().isAfter(p.getSeasonStartDate()) && LocalDate.now().isBefore(p.getSeasonEndDate())
                         && p.getAvailable() > 0)) {
-                    p.setAvailable(p.getAvailable() - 1);
-                    pr.save(p);
-                } else {
-                    ps.handleSeasonalProduct(p);
+                        p.setAvailable(p.getAvailable() - 1);
+                        pr.save(p);
+                    } else {
+                        ps.handleSeasonalProduct(p);
+                    }
                 }
-            } else if (ProductType.EXPIRABLE.equals(p.getType())) {
-                if (p.getAvailable() > 0 && p.getExpiryDate().isAfter(LocalDate.now())) {
-                    p.setAvailable(p.getAvailable() - 1);
-                    pr.save(p);
-                } else {
-                    ps.handleExpiredProduct(p);
+                case EXPIRABLE -> {
+                    if (p.getAvailable() > 0 && p.getExpiryDate().isAfter(LocalDate.now())) {
+                        p.setAvailable(p.getAvailable() - 1);
+                        pr.save(p);
+                    } else {
+                        ps.handleExpiredProduct(p);
+                    }
                 }
             }
         }
